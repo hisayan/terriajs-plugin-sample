@@ -1,4 +1,4 @@
-import { action, computed } from "mobx";
+import { action, computed, override } from "mobx";
 import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
 import Cartographic from "terriajs-cesium/Source/Core/Cartographic";
 import HeadingPitchRoll from "terriajs-cesium/Source/Core/HeadingPitchRoll";
@@ -100,7 +100,7 @@ export default class BoxDrawingCatalogItem extends CatalogMemberMixin(
    * Another way to extend the viewing controls menu is using
    * the `{@link ViewingControlsMenu.addMenuOption} function.
    */
-  @computed
+  @override
   get viewingControls(): ViewingControl[] {
     return [
       {

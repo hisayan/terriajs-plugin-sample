@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "module": "esNext",
-    "target": "es6",
+    "module": "esnext",
+    "target": "es2019",
     "moduleResolution": "node",
     "outDir": "dist/",
     "rootDir": "src/",
@@ -24,7 +24,12 @@
     "typeRoots": [
       "node_modules/terriajs/lib/ThirdParty",
       // need this if we are in a yarn workspace
-      "../../node_modules/terriajs/lib/ThirdParty"
+      "../../node_modules/terriajs/lib/ThirdParty",
+    ],
+    // 定義すれば大量のワーニングが減って、別の1つが
+    "types": [
+      "terriajs-cesium",
+      "terriajs"
     ]
   },
   "include": ["src"]

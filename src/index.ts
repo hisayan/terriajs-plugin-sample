@@ -7,10 +7,14 @@ import {
   TerriaPlugin,
   TerriaPluginContext,
   UserDrawing,
+  ViewState,
   Workbench
 } from "terriajs-plugin-api";
 import cubeIcon from "assets/icons/cube.svg";
+import { reaction } from "mobx";
 import BoxDrawingCatalogItem from "./BoxDrawingCatalogItem";
+
+const toolId = "draw-3d-box"
 
 const plugin: TerriaPlugin = {
   name: "Sample plugin",
@@ -18,20 +22,34 @@ const plugin: TerriaPlugin = {
   version: "0.0.1",
   register({ viewState, terria, workbench }: TerriaPluginContext) {
     let userDrawing: UserDrawing | undefined;
-    const drawModeButton = MapToolbar.addModeButton(viewState, {
-      icon: cubeIcon,
-      text: "Draw a 3D box",
-      onUserEnterMode: () => {
-        userDrawing = createUserRectangleDrawing(terria, rectangle => {
-          create3dBoxItemFromRectangle(terria, workbench, rectangle);
-          drawModeButton.closeMode();
-        });
-        userDrawing.enterDrawMode();
-      },
-      onUserCloseMode: () => {
-        userDrawing?.endDrawing();
+
+    const drawModeButton = MapToolbar.addTool(viewState, {
+      id: toolId, // Must be unique
+      name: "3D box",
+      // TODO: use import
+      toolComponentLoader: () => Promise.resolve({
+        default: () => {
+          userDrawing = createUserRectangleDrawing(terria, rectangle => {
+            create3dBoxItemFromRectangle(terria, workbench, rectangle);
+          });
+          userDrawing.enterDrawMode();
+          return null
+        },
+      }),
+      toolButton: {
+        text: "Draw a 3D box",
+        icon: cubeIcon
       }
     });
+
+    // Close
+    const item: any = terria.mapNavigationModel.findItem(toolId);
+    item.controller.myreaction = reaction(() => item.controller._active, (active) => {
+      console.log("hogehoge active", active);
+      if (!active) {
+        userDrawing?.endDrawing();
+      }
+    }, {});
   }
 };
 
@@ -49,7 +67,12 @@ function createUserRectangleDrawing(
     drawRectangle: true,
     onDrawingComplete: ({ rectangle }) => {
       if (rectangle) onRectangleComplete(rectangle);
+    },
+    onCleanUp: () => {
+      const item: any = terria.mapNavigationModel.findItem(toolId);
+      item.controller.deactivate();
     }
+
   });
 
   return userDrawing;
